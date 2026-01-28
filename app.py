@@ -3,6 +3,10 @@ from pygments import highlight
 from pygments.lexers import PythonLexer
 from pygments.formatters import ImageFormatter
 from pygments.formatters.img import FontNotFound
+from flask import Flask
+
+app = Flask(__name__)
+
 
 def code_to_image(code_text, output_file="static/output copy.png", font_name="DejaVu Sans Mono", font_size=20, style="monokai"):
     output_file = os.path.abspath(output_file)
