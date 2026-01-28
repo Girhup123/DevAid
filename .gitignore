@@ -1,5 +1,5 @@
 __pycache__/
 *.pyc
 venv/
-output copy.png
-static/output copy.png
+output.png
+static/output.png
