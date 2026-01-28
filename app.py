@@ -2,7 +2,9 @@ import os
 from flask import Flask, render_template, request, jsonify, send_file
 from generate import code_to_image
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="static", static_url_path="/static")
+os.makedirs("static", exist_ok=True)
+
 
 SAMPLE_CODE = """# Python sample: greeting multiple users
 def greet(name):
