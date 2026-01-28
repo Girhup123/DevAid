@@ -1,14 +1,16 @@
+import os
 from pygments import highlight
 from pygments.lexers import PythonLexer
 from pygments.formatters import ImageFormatter
 from pygments.formatters.img import FontNotFound
-import os
 
-def code_to_image(code_text, output_file="static/output.png", font_name="Consolas", font_size=20, style="monokai"):
-    folder = os.path.dirname(os.path.abspath(output_file))
+def code_to_image(code_text, output_file="static/output.png", font_name="DejaVu Sans Mono", font_size=20, style="monokai"):
+    output_file = os.path.abspath(output_file)
+    folder = os.path.dirname(output_file)
     if not os.path.exists(folder):
         os.makedirs(folder)
 
+    # Attempt to create formatter
     try:
         formatter = ImageFormatter(
             font_name=font_name,
@@ -17,18 +19,19 @@ def code_to_image(code_text, output_file="static/output.png", font_name="Consola
             style=style
         )
     except FontNotFound:
-        # Linux fallback
+        # Last-resort fallback
         formatter = ImageFormatter(
-            font_name="DejaVu Sans Mono",
+            font_name="Liberation Mono",
             font_size=font_size,
             line_numbers=True,
             style=style
         )
 
+    # Generate the image
     try:
         code_bytes = highlight(code_text, PythonLexer(), formatter)
         with open(output_file, "wb") as f:
             f.write(code_bytes)
     except Exception as e:
-        print(f"Error generating image: {e}")
-        raise e  # this lets Flask return a 500 if something fails
+        print(f"[generate.py] Error generating image: {e}")
+        raise e
