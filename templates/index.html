@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DevAid - every devleopers aid</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Smooth fade-in for preview image */
+        #preview {
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        #preview.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+<div class="max-w-7xl mx-auto p-6">
+    <h1 class="text-3xl font-bold mb-6">DevAid - code2image</h1>
+
+    <div class="flex flex-col md:flex-row gap-6">
+        <!-- Left: Code editor -->
+        <div class="flex-1">
+            <label class="block font-semibold mb-2">Paste your code:</label>
+            <textarea id="code" class="w-full h-96 p-3 border rounded-lg shadow" spellcheck="false">{{ code }}</textarea>
+
+            <div class="mt-4 flex gap-4 items-center flex-wrap">
+                <div>
+                    <label class="font-semibold">Theme:</label>
+                    <select id="theme" class="border rounded p-1">
+                        <option value="monokai" selected>Monokai</option>
+                        <option value="dracula">Dracula</option>
+                        <option value="solarized-dark">Solarized Dark</option>
+                        <option value="solarized-light">Solarized Light</option>
+                        <option value="github">GitHub</option>
+                        <option value="gruvbox-dark">Gruvbox Dark</option>
+                        <option value="default">Light</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="font-semibold">Font size:</label>
+                    <input id="font_size" type="range" min="10" max="40" value="20" class="slider">
+                    <span id="font_size_val">20</span> px
+                </div>
+
+                <button id="generateBtn" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transform transition-transform duration-200 hover:scale-105">Generate</button>
+            </div>
+        </div>
+
+        <!-- Right: Preview -->
+        <div class="flex-1 flex flex-col items-center">
+            <label class="block font-semibold mb-2">Preview:</label>
+            <img id="preview" src="/static/output.png" class="border rounded shadow w-full h-auto">
+            <a href="/download" id="downloadBtn" class="mt-4">
+                <button class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transform transition-transform duration-200 hover:scale-105">Download Image</button>
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    const codeInput = document.getElementById("code");
+    const themeSelect = document.getElementById("theme");
+    const fontSizeInput = document.getElementById("font_size");
+    const fontSizeVal = document.getElementById("font_size_val");
+    const preview = document.getElementById("preview");
+    const generateBtn = document.getElementById("generateBtn");
+
+    fontSizeInput.addEventListener("input", () => {
+        fontSizeVal.textContent = fontSizeInput.value;
+    });
+
+    async function generateImage() {
+        const response = await fetch("/generate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                code: codeInput.value,
+                theme: themeSelect.value,
+                font_size: fontSizeInput.value
+            })
+        });
+        const data = await response.json();
+        if(data.success){
+            preview.classList.remove("show"); // hide before reload
+            preview.src = `/static/output.png?${new Date().getTime()}`; // prevent cache
+            setTimeout(() => preview.classList.add("show"), 50); // fade-in effect
+        }
+    }
+
+    generateBtn.addEventListener("click", generateImage);
+</script>
+
+<div class="flex flex-col items-center gap-1 mb-6">
+    <img src="/static/logo.png" alt="Dev Aid Logo" class="h-12 w-auto">
+    <h1 class="text-3xl font-bold">Dev Aid</h1>
+    <p class="text-gray-400 text-sm italic">Work in progress</p>
+    <p class="text-sm text-gray-500">Made by Mugifa aka Faheem</p>
+</div>
+<p class="text-sm text-yellow-600 font-semibold">🎉 Free access until Feb 6!</p>
+</body>
+</html>
