@@ -53,7 +53,7 @@
         <!-- Right: Preview -->
         <div class="flex-1 flex flex-col items-center">
             <label class="block font-semibold mb-2">Preview:</label>
-            <img id="preview" src="/static/output.png" class="border rounded shadow w-full h-auto">
+            <img id="preview" src="/static/output copy.png" class="border rounded shadow w-full h-auto">
             <a href="/download" id="downloadBtn" class="mt-4">
                 <button class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transform transition-transform duration-200 hover:scale-105">Download Image</button>
             </a>
@@ -86,7 +86,7 @@
         const data = await response.json();
         if(data.success){
             preview.classList.remove("show"); // hide before reload
-            preview.src = `/static/output.png?${new Date().getTime()}`; // prevent cache
+            preview.src = `/static/output copy.png?${new Date().getTime()}`; // prevent cache
             setTimeout(() => preview.classList.add("show"), 50); // fade-in effect
         }
     }
