@@ -4,7 +4,7 @@ from pygments.lexers import PythonLexer
 from pygments.formatters import ImageFormatter
 from pygments.formatters.img import FontNotFound
 
-def code_to_image(code_text, output_file="static/output.png", font_name="DejaVu Sans Mono", font_size=20, style="monokai"):
+def code_to_image(code_text, output_file="static/output copy.png", font_name="DejaVu Sans Mono", font_size=20, style="monokai"):
     output_file = os.path.abspath(output_file)
     folder = os.path.dirname(output_file)
     if not os.path.exists(folder):
