@@ -1,40 +1,47 @@
 import os
-from pygments import highlight
-from pygments.lexers import PythonLexer
-from pygments.formatters import ImageFormatter
-from pygments.formatters.img import FontNotFound
-from flask import Flask
+from flask import Flask, render_template, request, jsonify, send_file
+from generate import code_to_image
 
 app = Flask(__name__)
 
+SAMPLE_CODE = """# Python sample: greeting multiple users
+def greet(name):
+    print(f"Hello, {name}!")
 
-def code_to_image(code_text, output_file="static/output copy.png", font_name="DejaVu Sans Mono", font_size=20, style="monokai"):
-    output_file = os.path.abspath(output_file)
-    folder = os.path.dirname(output_file)
-    if not os.path.exists(folder):
-        os.makedirs(folder)
+users = ["Alice", "Bob", "Charlie"]
 
-    try:
-        formatter = ImageFormatter(
-            font_name=font_name,
-            font_size=font_size,
-            line_numbers=True,
-            style=style
-        )
-    except FontNotFound:
-        # Linux fallback
-        formatter = ImageFormatter(
-            font_name="Liberation Mono",
-            font_size=font_size,
-            line_numbers=True,
-            style=style
-        )
+for user in users:
+    greet(user)
+"""
 
-    # Generate the image
-    try:
-        code_bytes = highlight(code_text, PythonLexer(), formatter)
-        with open(output_file, "wb") as f:
-            f.write(code_bytes)
-    except Exception as e:
-        print(f"[generate.py] Error generating image: {e}")
-        raise e
+@app.route("/")
+def home():
+    return render_template("index.html", code=SAMPLE_CODE, theme="monokai", font_size=20)
+
+
+@app.route("/generate", methods=["POST"])
+def generate():
+    data = request.json
+    code = data.get("code", SAMPLE_CODE)
+    theme = data.get("theme", "monokai")
+    font_size = int(data.get("font_size", 20))
+
+    code_to_image(code, "static/output.png", font_size=font_size, style=theme)
+
+    return jsonify({"success": True, "image_url": "/static/output.png"})
+
+
+@app.route("/download")
+def download():
+    return send_file("static/output.png", as_attachment=True)
+
+
+@app.route("/health")
+def health():
+    return jsonify({"status": "ok"})
+
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
+

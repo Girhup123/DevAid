@@ -4,13 +4,18 @@ from pygments.lexers import PythonLexer
 from pygments.formatters import ImageFormatter
 from pygments.formatters.img import FontNotFound
 
-def code_to_image(code_text, output_file="static/output copy.png", font_name="DejaVu Sans Mono", font_size=20, style="monokai"):
+
+def code_to_image(code_text, output_file="static/output.png",
+                  font_name="DejaVu Sans Mono",
+                  font_size=20,
+                  style="monokai"):
+
     output_file = os.path.abspath(output_file)
     folder = os.path.dirname(output_file)
+
     if not os.path.exists(folder):
         os.makedirs(folder)
 
-    # Attempt to create formatter
     try:
         formatter = ImageFormatter(
             font_name=font_name,
@@ -19,7 +24,6 @@ def code_to_image(code_text, output_file="static/output copy.png", font_name="De
             style=style
         )
     except FontNotFound:
-        # Last-resort fallback
         formatter = ImageFormatter(
             font_name="Liberation Mono",
             font_size=font_size,
@@ -27,11 +31,7 @@ def code_to_image(code_text, output_file="static/output copy.png", font_name="De
             style=style
         )
 
-    # Generate the image
-    try:
-        code_bytes = highlight(code_text, PythonLexer(), formatter)
-        with open(output_file, "wb") as f:
-            f.write(code_bytes)
-    except Exception as e:
-        print(f"[generate.py] Error generating image: {e}")
-        raise e
+    code_bytes = highlight(code_text, PythonLexer(), formatter)
+
+    with open(output_file, "wb") as f:
+        f.write(code_bytes)
