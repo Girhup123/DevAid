@@ -19,7 +19,8 @@ DevAid is a free web tool that converts your code into beautiful, shareable imag
 
 ## 🖼️ Screenshot
 
-![DevAid Screenshot](assets/output(1).png)
+![DevAid Screenshot](assets/screenshot.png)
+
 
 
 ---
@@ -30,6 +31,7 @@ DevAid is a free web tool that converts your code into beautiful, shareable imag
 - HTML / CSS (frontend)
 - Git & GitHub
 - Render (deployment)
+- and more
 
 ---
 
