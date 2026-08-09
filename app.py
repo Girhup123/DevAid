@@ -1,5 +1,6 @@
 import os
-from flask import Flask, render_template, request, jsonify, send_file
+import uuid
+from flask import Flask, render_template, request, jsonify, send_from_directory
 from generate import code_to_image
 
 app = Flask(__name__, static_folder="static", static_url_path="/static")
@@ -29,14 +30,20 @@ def generate():
     theme = data.get("theme", "monokai")
     font_size = int(data.get("font_size", 20))
 
-    code_to_image(code, "static/output.png", font_size=font_size, style=theme)
+    # Generate a unique filename using UUID
+    unique_filename = f"output_{uuid.uuid4().hex[:8]}.png"
+    filepath = os.path.join("static", unique_filename)
 
-    return jsonify({"success": True, "image_url": "/static/output.png"})
+    # Pass the unique path to the renderer
+    code_to_image(code, filepath, font_size=font_size, style=theme)
+
+    return jsonify({"success": True, "image_url": f"/static/{unique_filename}", "filename": unique_filename})
 
 # -------------------- DOWNLOAD IMAGE --------------------
-@app.route("/download")
-def download():
-    return send_file("static/output.png", as_attachment=True)
+@app.route("/download/<filename>")
+def download(filename):
+    # Securely serve the specific file as an attachment
+    return send_from_directory("static", filename, as_attachment=True)
 
 # -------------------- HEALTH CHECK --------------------
 @app.route("/health")

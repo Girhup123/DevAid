@@ -116,7 +116,6 @@ fontSizeInput.addEventListener("input", () => {
 });
 
 async function generateImage() {
-    // Show loader
     loader.style.display = "flex";
 
     const response = await fetch("/generate", {
@@ -131,15 +130,19 @@ async function generateImage() {
 
     const data = await response.json();
 
-    if(data.success){
-        preview.classList.remove("show"); // hide old image
-        preview.src = `/static/output.png?t=${new Date().getTime()}`; // cache-busting
-        setTimeout(() => preview.classList.add("show"), 50); // fade-in
-    }
+   if(data.success){
+    preview.classList.remove("show");
+    preview.src = data.image_url;
+    
+    // Update the download link dynamically
+    document.getElementById("downloadBtn").href = `/download/${data.filename}`;
+    
+    setTimeout(() => preview.classList.add("show"), 50);
+}
 
-    // Hide loader
     loader.style.display = "none";
 }
+
 
 generateBtn.addEventListener("click", generateImage);
 </script>
