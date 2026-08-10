@@ -2,13 +2,26 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>DevAid - Every Developer's Aid</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DevAid - Code to Beautiful Image Generator</title>
 <script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        colors: {
+          brand: '#10B981',
+        }
+      }
+    }
+  }
+</script>
 <style>
     /* Smooth fade-in for preview image */
     #preview {
         opacity: 0;
-        transition: opacity 0.5s ease-in-out;
+        transition: opacity 0.4s ease-in-out, transform 0.3s ease;
     }
     #preview.show {
         opacity: 1;
@@ -21,11 +34,11 @@
         left: 0;
         width: 100vw;
         height: 100vh;
-        background: rgba(0,0,0,0.2);
+        background: rgba(0,0,0,0.4);
         display: none;
         justify-content: center;
         align-items: center;
-        backdrop-filter: blur(3px);
+        backdrop-filter: blur(6px);
         z-index: 50;
     }
 
@@ -33,11 +46,10 @@
     .spinner {
         width: 50px;
         height: 50px;
-        border: 5px solid #10B981; /* Tailwind green-500 */
-        border-top: 5px solid transparent;
+        border: 4px solid #10B981;
+        border-top: 4px solid transparent;
         border-radius: 50%;
-        animation: spin 1s linear infinite, glow 1.5s ease-in-out infinite alternate;
-        box-shadow: 0 0 15px #10B981;
+        animation: spin 0.8s linear infinite, glow 1.5s ease-in-out infinite alternate;
     }
 
     @keyframes spin {
@@ -51,70 +63,126 @@
     }
 </style>
 </head>
-<body class="bg-gray-100 text-gray-800">
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 transition-colors duration-300 min-h-screen">
 
 <!-- Loader overlay -->
-<div id="loader" class="flex">
+<div id="loader">
     <div class="spinner"></div>
 </div>
 
 <div class="max-w-7xl mx-auto p-6">
-    <h1 class="text-3xl font-bold mb-6">DevAid - code2image</h1>
+    <!-- Header Bar with Theme Toggle -->
+    <header class="flex justify-between items-center mb-8 border-b dark:border-gray-800 pb-4">
+        <div class="flex items-center gap-3">
+            <img src="/static/logo.png" alt="DevAid Logo" class="h-10 w-auto rounded-lg shadow">
+            <div>
+                <h1 class="text-2xl font-bold bg-gradient-to-r from-emerald-500 to-cyan-500 bg-clip-text text-transparent">DevAid</h1>
+                <p class="text-xs text-gray-400">code2image generator</p>
+            </div>
+        </div>
 
-    <div class="flex flex-col md:flex-row gap-6">
-        <!-- Left: Code editor -->
-        <div class="flex-1">
-            <label class="block font-semibold mb-2">Paste your code:</label>
-            <textarea id="code" class="w-full h-96 p-3 border rounded-lg shadow" spellcheck="false">{{ code }}</textarea>
+        <button id="darkModeToggle" class="p-2 rounded-xl bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:scale-105 transition-all duration-200 flex items-center gap-2 text-sm font-medium">
+            <span id="themeIcon">🌙</span> <span id="themeText">Dark Mode</span>
+        </button>
+    </header>
 
-            <div class="mt-4 flex gap-4 items-center flex-wrap">
+    <div class="flex flex-col lg:flex-row gap-8">
+        <!-- Left: Code editor & Controls -->
+        <div class="flex-1 bg-white dark:bg-gray-800/60 backdrop-blur-lg p-6 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700/50">
+            <label class="block font-semibold mb-2 text-sm uppercase tracking-wider text-gray-500 dark:text-gray-400">Paste your code:</label>
+            <textarea id="code" class="w-full h-80 p-4 font-mono text-sm border dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900/80 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all shadow-inner" spellcheck="false">{{ code }}</textarea>
+
+            <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                    <label class="font-semibold">Theme:</label>
-                    <select id="theme" class="border rounded p-1">
+                    <label class="block text-xs font-semibold mb-1 text-gray-500 dark:text-gray-400">Syntax Theme</label>
+                    <select id="theme" class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
                         <option value="monokai" selected>Monokai</option>
                         <option value="dracula">Dracula</option>
                         <option value="solarized-dark">Solarized Dark</option>
                         <option value="solarized-light">Solarized Light</option>
                         <option value="github">GitHub</option>
                         <option value="gruvbox-dark">Gruvbox Dark</option>
-                        <option value="default">Light</option>
                     </select>
                 </div>
 
                 <div>
-                    <label class="font-semibold">Font size:</label>
-                    <input id="font_size" type="range" min="10" max="40" value="20" class="slider">
-                    <span id="font_size_val">20</span> px
+                    <label class="block text-xs font-semibold mb-1 text-gray-500 dark:text-gray-400">Gradient Canvas</label>
+                    <select id="gradient" class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+                        <option value="purple_blue" selected>🟣 Purple Blue</option>
+                        <option value="sunset">🌅 Sunset Gold</option>
+                        <option value="cyberpunk">⚡ Cyberpunk Neon</option>
+                        <option value="dark">🖤 Dark Carbon</option>
+                    </select>
                 </div>
 
-                <button id="generateBtn" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transform transition-transform duration-200 hover:scale-105">Generate</button>
+                <div class="sm:col-span-2 flex items-center justify-between bg-gray-50 dark:bg-gray-900/50 p-3 rounded-xl border dark:border-gray-700">
+                    <label class="text-xs font-semibold text-gray-500 dark:text-gray-400">Font Size: <span id="font_size_val" class="text-emerald-500 font-bold">20</span>px</label>
+                    <input id="font_size" type="range" min="12" max="36" value="20" class="w-1/2 accent-emerald-500 cursor-pointer">
+                </div>
             </div>
+
+            <button id="generateBtn" class="w-full mt-6 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:shadow-emerald-500/25 transform transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]">
+                ✨ Generate Image
+            </button>
         </div>
 
-        <!-- Right: Preview -->
-        <div class="flex-1 flex flex-col items-center">
-            <label class="block font-semibold mb-2">Preview:</label>
-            <img id="preview" src="/static/output.png" class="border rounded shadow max-w-full h-auto">
-            <a href="/download" id="downloadBtn" class="mt-4">
-                <button class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transform transition-transform duration-200 hover:scale-105">Download Image</button>
-            </a>
+        <!-- Right: Live Preview & Downloads -->
+        <div class="flex-1 flex flex-col items-center justify-between bg-white dark:bg-gray-800/60 backdrop-blur-lg p-6 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700/50">
+            <div class="w-full flex flex-col items-center">
+                <label class="block font-semibold mb-4 text-sm uppercase tracking-wider text-gray-500 dark:text-gray-400 self-start">Preview:</label>
+                <div class="w-full flex justify-center items-center min-h-[300px] bg-gray-100 dark:bg-gray-900/50 rounded-xl p-4 border dark:border-gray-700/50">
+                    <img id="preview" src="/static/output.png" class="rounded-xl shadow-2xl max-w-full h-auto max-h-[420px] object-contain">
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="w-full flex flex-wrap gap-4 mt-6">
+                <button id="copyBtn" onclick="copyImageToClipboard()" class="flex-1 min-w-[140px] bg-gray-800 hover:bg-gray-900 dark:bg-gray-700 dark:hover:bg-gray-600 text-white font-semibold py-2.5 px-4 rounded-xl shadow transition-all duration-200 flex items-center justify-center gap-2">
+                    📋 Copy to Clipboard
+                </button>
+                <a href="/download" id="downloadBtn" class="flex-1 min-w-[140px]">
+                    <button class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 px-4 rounded-xl shadow transition-all duration-200 flex items-center justify-center gap-2">
+                        ⬇️ Download PNG
+                    </button>
+                </a>
+            </div>
         </div>
     </div>
+
+    <!-- Footer -->
+    <footer class="mt-12 text-center text-sm text-gray-400 dark:text-gray-500">
+        <p>Made by <span class="font-semibold text-gray-700 dark:text-gray-300">Faheem</span> • Powered by Python & Flask</p>
+    </footer>
 </div>
 
 <script>
 const codeInput = document.getElementById("code");
 const themeSelect = document.getElementById("theme");
+const gradientSelect = document.getElementById("gradient");
 const fontSizeInput = document.getElementById("font_size");
 const fontSizeVal = document.getElementById("font_size_val");
 const preview = document.getElementById("preview");
 const generateBtn = document.getElementById("generateBtn");
 const loader = document.getElementById("loader");
 
+// Slider dynamic update
 fontSizeInput.addEventListener("input", () => {
     fontSizeVal.textContent = fontSizeInput.value;
 });
 
+// Dark Mode Toggle Logic
+const darkModeToggle = document.getElementById("darkModeToggle");
+const themeIcon = document.getElementById("themeIcon");
+const themeText = document.getElementById("themeText");
+
+darkModeToggle.addEventListener("click", () => {
+    document.documentElement.classList.toggle("dark");
+    const isDark = document.documentElement.classList.contains("dark");
+    themeIcon.textContent = isDark ? "☀️" : "🌙";
+    themeText.textContent = isDark ? "Light Mode" : "Dark Mode";
+});
+
+// Generate Image Handler
 async function generateImage() {
     loader.style.display = "flex";
 
@@ -124,35 +192,51 @@ async function generateImage() {
         body: JSON.stringify({
             code: codeInput.value,
             theme: themeSelect.value,
+            gradient: gradientSelect.value,
             font_size: fontSizeInput.value
         })
     });
 
     const data = await response.json();
 
-   if(data.success){
-    preview.classList.remove("show");
-    preview.src = data.image_url;
-    
-    // Update the download link dynamically
-    document.getElementById("downloadBtn").href = `/download/${data.filename}`;
-    
-    setTimeout(() => preview.classList.add("show"), 50);
-}
+    if(data.success){
+        preview.classList.remove("show");
+        preview.src = data.image_url + "?t=" + new Date().getTime(); // Prevent browser cache
+        
+        document.getElementById("downloadBtn").href = `/download/${data.filename}`;
+        
+        setTimeout(() => preview.classList.add("show"), 50);
+    }
 
     loader.style.display = "none";
 }
 
+// Copy Image to Clipboard Handler
+async function copyImageToClipboard() {
+    const copyBtn = document.getElementById('copyBtn');
+    
+    try {
+        const response = await fetch(preview.src);
+        const blob = await response.blob();
+        
+        await navigator.clipboard.write([
+            new ClipboardItem({ [blob.type]: blob })
+        ]);
+        
+        const originalText = copyBtn.innerHTML;
+        copyBtn.innerHTML = "✓ Copied!";
+        copyBtn.classList.add("bg-emerald-600");
+        
+        setTimeout(() => {
+            copyBtn.innerHTML = originalText;
+            copyBtn.classList.remove("bg-emerald-600");
+        }, 2000);
+    } catch (err) {
+        alert("Copying image failed. Try downloading instead.");
+    }
+}
 
 generateBtn.addEventListener("click", generateImage);
 </script>
-
-<div class="flex flex-col items-center gap-1 mb-6 mt-6">
-    <img src="/static/logo.png" alt="DevAid Logo" class="h-12 w-auto">
-    <h1 class="text-3xl font-bold">DevAid</h1>
-    <p class="text-gray-400 text-sm italic">Work in progress</p>
-    <p class="text-sm text-gray-500">Made by Mugifa aka Faheem</p>
-</div>
-<p class="text-sm text-yellow-600 font-semibold text-center pb-6">🎉 Free access available!</p>
 </body>
 </html>
