@@ -1,242 +1,393 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DevAid - Code to Beautiful Image Generator</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-  tailwind.config = {
-    darkMode: 'class',
-    theme: {
-      extend: {
-        colors: {
-          brand: '#10B981',
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevAid - Code Snippet Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            500: '#10b981',
+                            600: '#059669',
+                        }
+                    }
+                }
+            }
         }
-      }
-    }
-  }
-</script>
-<style>
-    /* Smooth fade-in for preview image */
-    #preview {
-        opacity: 0;
-        transition: opacity 0.4s ease-in-out, transform 0.3s ease;
-    }
-    #preview.show {
-        opacity: 1;
-    }
-
-    /* Loader overlay */
-    #loader {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background: rgba(0,0,0,0.4);
-        display: none;
-        justify-content: center;
-        align-items: center;
-        backdrop-filter: blur(6px);
-        z-index: 50;
-    }
-
-    /* Glowing spinning orb */
-    .spinner {
-        width: 50px;
-        height: 50px;
-        border: 4px solid #10B981;
-        border-top: 4px solid transparent;
-        border-radius: 50%;
-        animation: spin 0.8s linear infinite, glow 1.5s ease-in-out infinite alternate;
-    }
-
-    @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
-
-    @keyframes glow {
-        0% { box-shadow: 0 0 10px #10B981; }
-        100% { box-shadow: 0 0 25px #34D399; }
-    }
-</style>
+    </script>
 </head>
-<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 transition-colors duration-300 min-h-screen">
+<body class="bg-gray-100 dark:bg-gray-950 text-gray-900 dark:text-gray-100 min-h-screen flex flex-col font-sans antialiased transition-colors duration-200">
 
-<!-- Loader overlay -->
-<div id="loader">
-    <div class="spinner"></div>
-</div>
+    <!-- Header -->
+    <header class="border-b border-gray-200 dark:border-gray-800 bg-white/70 dark:bg-gray-900/50 backdrop-blur-md sticky top-0 z-50 transition-colors">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between gap-2 flex-wrap">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center font-bold text-gray-950 text-lg shadow-lg shadow-emerald-500/20">
+                    &lt;/&gt;
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight">DevAid</h1>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Developer Snippet Studio</p>
+                </div>
+            </div>
 
-<div class="max-w-7xl mx-auto p-6">
-    <!-- Header Bar with Theme Toggle -->
-    <header class="flex justify-between items-center mb-8 border-b dark:border-gray-800 pb-4">
-        <div class="flex items-center gap-3">
-            <img src="/static/logo.png" alt="DevAid Logo" class="h-10 w-auto rounded-lg shadow">
-            <div>
-                <h1 class="text-2xl font-bold bg-gradient-to-r from-emerald-500 to-cyan-500 bg-clip-text text-transparent">DevAid</h1>
-                <p class="text-xs text-gray-400">code2image generator</p>
+            <div class="flex items-center gap-2 flex-wrap">
+                <button id="presetTwitter" type="button" class="bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-xs text-gray-800 dark:text-gray-200 font-medium px-2.5 py-2 rounded-lg transition-all border border-gray-300 dark:border-gray-700">🐦 Twitter/X</button>
+                <button id="presetInsta" type="button" class="bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-xs text-gray-800 dark:text-gray-200 font-medium px-2.5 py-2 rounded-lg transition-all border border-gray-300 dark:border-gray-700">📸 Instagram</button>
+
+                <button id="themeToggleBtn" aria-label="Toggle Theme" class="bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 font-medium p-2.5 rounded-xl text-sm transition-all active:scale-95 flex items-center justify-center border border-gray-300 dark:border-gray-700">
+                    <svg id="sunIcon" class="w-4 h-4 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    <svg id="moonIcon" class="w-4 h-4 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                </button>
+
+                <button id="generateBtn" class="bg-emerald-500 hover:bg-emerald-600 text-gray-950 font-semibold px-4 py-2 rounded-xl text-sm transition-all shadow-lg shadow-emerald-500/20 active:scale-95 flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    Generate
+                </button>
+
+                <button id="copyImgBtn" class="bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 font-medium px-3.5 py-2 rounded-xl text-sm transition-all active:scale-95 flex items-center gap-2 border border-gray-300 dark:border-gray-700">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                    <span id="copyImgText">Copy Image</span>
+                </button>
+
+                <button id="shareUrlBtn" class="bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 font-medium px-3.5 py-2 rounded-xl text-sm transition-all active:scale-95 flex items-center gap-2 border border-gray-300 dark:border-gray-700">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
+                    <span id="shareUrlText">Share Link</span>
+                </button>
+
+                <button id="downloadBtn" class="bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 font-medium px-3.5 py-2 rounded-xl text-sm transition-all active:scale-95 flex items-center gap-2 border border-gray-300 dark:border-gray-700">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    Export PNG
+                </button>
             </div>
         </div>
-
-        <button id="darkModeToggle" class="p-2 rounded-xl bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:scale-105 transition-all duration-200 flex items-center gap-2 text-sm font-medium">
-            <span id="themeIcon">🌙</span> <span id="themeText">Dark Mode</span>
-        </button>
     </header>
 
-    <div class="flex flex-col lg:flex-row gap-8">
-        <!-- Left: Code editor & Controls -->
-        <div class="flex-1 bg-white dark:bg-gray-800/60 backdrop-blur-lg p-6 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700/50">
-            <label class="block font-semibold mb-2 text-sm uppercase tracking-wider text-gray-500 dark:text-gray-400">Paste your code:</label>
-            <textarea id="code" class="w-full h-80 p-4 font-mono text-sm border dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900/80 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all shadow-inner" spellcheck="false">{{ code }}</textarea>
+    <!-- Workspace -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-            <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-xs font-semibold mb-1 text-gray-500 dark:text-gray-400">Syntax Theme</label>
-                    <select id="theme" class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
-                        <option value="monokai" selected>Monokai</option>
-                        <option value="dracula">Dracula</option>
-                        <option value="solarized-dark">Solarized Dark</option>
-                        <option value="solarized-light">Solarized Light</option>
-                        <option value="github">GitHub</option>
-                        <option value="gruvbox-dark">Gruvbox Dark</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold mb-1 text-gray-500 dark:text-gray-400">Gradient Canvas</label>
-                    <select id="gradient" class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
-                        <option value="purple_blue" selected>🟣 Purple Blue</option>
-                        <option value="sunset">🌅 Sunset Gold</option>
-                        <option value="cyberpunk">⚡ Cyberpunk Neon</option>
-                        <option value="dark">🖤 Dark Carbon</option>
-                    </select>
-                </div>
-
-                <div class="sm:col-span-2 flex items-center justify-between bg-gray-50 dark:bg-gray-900/50 p-3 rounded-xl border dark:border-gray-700">
-                    <label class="text-xs font-semibold text-gray-500 dark:text-gray-400">Font Size: <span id="font_size_val" class="text-emerald-500 font-bold">20</span>px</label>
-                    <input id="font_size" type="range" min="12" max="36" value="20" class="w-1/2 accent-emerald-500 cursor-pointer">
-                </div>
-            </div>
-
-            <button id="generateBtn" class="w-full mt-6 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:shadow-emerald-500/25 transform transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]">
-                ✨ Generate Image
-            </button>
-        </div>
-
-        <!-- Right: Live Preview & Downloads -->
-        <div class="flex-1 flex flex-col items-center justify-between bg-white dark:bg-gray-800/60 backdrop-blur-lg p-6 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700/50">
-            <div class="w-full flex flex-col items-center">
-                <label class="block font-semibold mb-4 text-sm uppercase tracking-wider text-gray-500 dark:text-gray-400 self-start">Preview:</label>
-                <div class="w-full flex justify-center items-center min-h-[300px] bg-gray-100 dark:bg-gray-900/50 rounded-xl p-4 border dark:border-gray-700/50">
-                    <img id="preview" src="/static/output.png" class="rounded-xl shadow-2xl max-w-full h-auto max-h-[420px] object-contain">
-                </div>
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="w-full flex flex-wrap gap-4 mt-6">
-                <button id="copyBtn" onclick="copyImageToClipboard()" class="flex-1 min-w-[140px] bg-gray-800 hover:bg-gray-900 dark:bg-gray-700 dark:hover:bg-gray-600 text-white font-semibold py-2.5 px-4 rounded-xl shadow transition-all duration-200 flex items-center justify-center gap-2">
-                    📋 Copy to Clipboard
-                </button>
-                <a href="/download" id="downloadBtn" class="flex-1 min-w-[140px]">
-                    <button class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 px-4 rounded-xl shadow transition-all duration-200 flex items-center justify-center gap-2">
-                        ⬇️ Download PNG
+        <!-- Customizer Panel -->
+        <div class="lg:col-span-5 flex flex-col gap-5">
+            <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 flex flex-col gap-2 shadow-sm dark:shadow-none transition-colors">
+                <div class="flex items-center justify-between">
+                    <label for="code" class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Code Snippet <span class="text-[10px] text-gray-400 font-normal">(Ctrl + Enter to render)</span></label>
+                    <button id="copyCodeBtn" class="text-xs text-emerald-600 dark:text-emerald-400 hover:underline font-medium transition-colors flex items-center gap-1">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                        <span id="copyCodeText">Copy Code</span>
                     </button>
-                </a>
+                </div>
+                <textarea id="code" rows="9" spellcheck="false" class="w-full bg-gray-50 dark:bg-gray-950 border border-gray-300 dark:border-gray-800 rounded-xl p-3 font-mono text-sm text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 resize-y leading-relaxed transition-colors">{{ code }}</textarea>
+            </div>
+
+            <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5 flex flex-col gap-4 shadow-sm dark:shadow-none transition-colors">
+                <h2 class="text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-800 pb-2">Customization</h2>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="flex flex-col gap-1.5">
+                        <label for="language" class="text-xs font-medium text-gray-700 dark:text-gray-300">Language</label>
+                        <select id="language" class="w-full bg-gray-50 dark:bg-gray-950 border border-gray-300 dark:border-gray-800 rounded-xl p-2.5 text-sm text-gray-900 dark:text-gray-200 focus:ring-2 focus:ring-emerald-500/50 outline-none transition-colors capitalize">
+                            {% for lang in languages %}
+                                <option value="{{ lang }}" {% if language == lang %}selected{% endif %}>{{ lang }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="flex flex-col gap-1.5">
+                        <label for="gradient" class="text-xs font-medium text-gray-700 dark:text-gray-300">Background</label>
+                        <select id="gradient" class="w-full bg-gray-50 dark:bg-gray-950 border border-gray-300 dark:border-gray-800 rounded-xl p-2.5 text-sm text-gray-900 dark:text-gray-200 focus:ring-2 focus:ring-emerald-500/50 outline-none transition-colors">
+                            <option value="purple_blue" {% if gradient == 'purple_blue' %}selected{% endif %}>🟣 Purple Blue</option>
+                            <option value="transparent" {% if gradient == 'transparent' %}selected{% endif %}>🏁 Transparent PNG</option>
+                            <option value="glass_purple" {% if gradient == 'glass_purple' %}selected{% endif %}>✨ Frosted Glass</option>
+                            <option value="sunset" {% if gradient == 'sunset' %}selected{% endif %}>🌅 Sunset Gold</option>
+                            <option value="cyberpunk" {% if gradient == 'cyberpunk' %}selected{% endif %}>⚡ Cyberpunk Neon</option>
+                            <option value="ocean" {% if gradient == 'ocean' %}selected{% endif %}>🌊 Deep Ocean</option>
+                            <option value="emerald" {% if gradient == 'emerald' %}selected{% endif %}>🌿 Mint Emerald</option>
+                            <option value="dark" {% if gradient == 'dark' %}selected{% endif %}>🖤 Dark Carbon</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="flex flex-col gap-1.5">
+                        <label for="theme" class="text-xs font-medium text-gray-700 dark:text-gray-300">Syntax Theme (Categorized)</label>
+                        <select id="theme" class="w-full bg-gray-50 dark:bg-gray-950 border border-gray-300 dark:border-gray-800 rounded-xl p-2.5 text-sm text-gray-900 dark:text-gray-200 focus:ring-2 focus:ring-emerald-500/50 outline-none transition-colors">
+                            <optgroup label="🌙 Dark Themes">
+                                <option value="dracula" {% if theme == 'dracula' %}selected{% endif %}>Dracula</option>
+                                <option value="monokai" {% if theme == 'monokai' %}selected{% endif %}>Monokai</option>
+                                <option value="nord" {% if theme == 'nord' %}selected{% endif %}>Nord</option>
+                                <option value="github-dark" {% if theme == 'github-dark' %}selected{% endif %}>GitHub Dark</option>
+                                <option value="one-dark" {% if theme == 'one-dark' %}selected{% endif %}>One Dark</option>
+                                <option value="material" {% if theme == 'material' %}selected{% endif %}>Material Dark</option>
+                                <option value="inkpot" {% if theme == 'inkpot' %}selected{% endif %}>Inkpot</option>
+                                <option value="native" {% if theme == 'native' %}selected{% endif %}>Native</option>
+                                <option value="stata-dark" {% if theme == 'stata-dark' %}selected{% endif %}>Stata Dark</option>
+                            </optgroup>
+                            <optgroup label="☀️ Light Themes">
+                                <option value="default" {% if theme == 'default' %}selected{% endif %}>Default Light</option>
+                                <option value="github-light" {% if theme == 'github-light' %}selected{% endif %}>GitHub Light</option>
+                                <option value="vs" {% if theme == 'vs' %}selected{% endif %}>VS Light</option>
+                                <option value="xcode" {% if theme == 'xcode' %}selected{% endif %}>Xcode Light</option>
+                                <option value="solarized-light" {% if theme == 'solarized-light' %}selected{% endif %}>Solarized Light</option>
+                                <option value="manni" {% if theme == 'manni' %}selected{% endif %}>Manni</option>
+                                <option value="pastie" {% if theme == 'pastie' %}selected{% endif %}>Pastie</option>
+                                <option value="friendly" {% if theme == 'friendly' %}selected{% endif %}>Friendly</option>
+                                <option value="trac" {% if theme == 'trac' %}selected{% endif %}>Trac</option>
+                            </optgroup>
+                            <optgroup label="🎨 Retro / Neon / Colorful">
+                                <option value="fruity" {% if theme == 'fruity' %}selected{% endif %}>Fruity Neon</option>
+                                <option value="paraiso-dark" {% if theme == 'paraiso-dark' %}selected{% endif %}>Paraiso Dark</option>
+                                <option value="zenburn" {% if theme == 'zenburn' %}selected{% endif %}>Zenburn Warm</option>
+                                <option value="solarized-dark" {% if theme == 'solarized-dark' %}selected{% endif %}>Solarized Dark</option>
+                                <option value="autumn" {% if theme == 'autumn' %}selected{% endif %}>Autumn Amber</option>
+                                <option value="rainbow_dash" {% if theme == 'rainbow_dash' %}selected{% endif %}>Rainbow Dash</option>
+                            </optgroup>
+                        </select>
+                    </div>
+
+                    <div class="flex flex-col gap-1.5">
+                        <label for="window_style" class="text-xs font-medium text-gray-700 dark:text-gray-300">Window Header</label>
+                        <select id="window_style" class="w-full bg-gray-50 dark:bg-gray-950 border border-gray-300 dark:border-gray-800 rounded-xl p-2.5 text-sm text-gray-900 dark:text-gray-200 focus:ring-2 focus:ring-emerald-500/50 outline-none transition-colors">
+                            <option value="mac" {% if window_style == 'mac' %}selected{% endif %}>macOS Dots</option>
+                            <option value="win" {% if window_style == 'win' %}selected{% endif %}>Windows Controls</option>
+                            <option value="none" {% if window_style == 'none' %}selected{% endif %}>Borderless</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="flex flex-col gap-1.5">
+                        <label for="aspect_ratio" class="text-xs font-medium text-gray-700 dark:text-gray-300">Aspect Ratio</label>
+                        <select id="aspect_ratio" class="w-full bg-gray-50 dark:bg-gray-950 border border-gray-300 dark:border-gray-800 rounded-xl p-2.5 text-sm text-gray-900 dark:text-gray-200 focus:ring-2 focus:ring-emerald-500/50 outline-none transition-colors">
+                            <option value="auto" {% if aspect_ratio == 'auto' %}selected{% endif %}>Auto Fit</option>
+                            <option value="1:1" {% if aspect_ratio == '1:1' %}selected{% endif %}>1:1 Square</option>
+                            <option value="16:9" {% if aspect_ratio == '16:9' %}selected{% endif %}>16:9 Widescreen</option>
+                        </select>
+                    </div>
+
+                    <div class="flex flex-col gap-1.5">
+                        <label for="window_title" class="text-xs font-medium text-gray-700 dark:text-gray-300">Window Title</label>
+                        <input type="text" id="window_title" value="{{ window_title }}" placeholder="main.py" class="w-full bg-gray-50 dark:bg-gray-950 border border-gray-300 dark:border-gray-800 rounded-xl p-2.5 text-sm text-gray-900 dark:text-gray-200 focus:ring-2 focus:ring-emerald-500/50 outline-none transition-colors">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <!-- Fixed Watermark Box -->
+                    <div class="flex flex-col gap-1.5">
+                        <label for="watermark" class="text-xs font-medium text-gray-700 dark:text-gray-300">Watermark Text</label>
+                        <input type="text" id="watermark" value="{{ watermark }}" placeholder="e.g. @devaid" class="w-full bg-gray-50 dark:bg-gray-950 border border-gray-300 dark:border-gray-800 rounded-xl p-2.5 text-sm text-gray-900 dark:text-gray-200 focus:ring-2 focus:ring-emerald-500/50 outline-none transition-colors">
+                    </div>
+
+                    <div class="flex flex-col gap-1.5">
+                        <label for="highlight_lines" class="text-xs font-medium text-gray-700 dark:text-gray-300">Highlight Lines</label>
+                        <input type="text" id="highlight_lines" value="{{ highlight_lines }}" placeholder="e.g. 1, 3-5" class="w-full bg-gray-50 dark:bg-gray-950 border border-gray-300 dark:border-gray-800 rounded-xl p-2.5 text-sm text-gray-900 dark:text-gray-200 focus:ring-2 focus:ring-emerald-500/50 outline-none transition-colors">
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between border-t border-gray-200 dark:border-gray-800 pt-3">
+                    <label class="text-xs font-medium text-gray-700 dark:text-gray-300">Show Line Numbers</label>
+                    <label class="inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="show_line_numbers" {% if show_line_numbers %}checked{% endif %} class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer dark:bg-gray-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500 relative"></div>
+                    </label>
+                </div>
+
+                <div class="flex flex-col gap-2">
+                    <div class="flex justify-between items-center text-xs font-medium text-gray-700 dark:text-gray-300">
+                        <label for="font_size">Font Size</label>
+                        <span id="font_size_val" class="text-emerald-600 dark:text-emerald-400 font-mono">{{ font_size }}px</span>
+                    </div>
+                    <input type="range" id="font_size" min="12" max="36" value="{{ font_size }}" class="w-full accent-emerald-500">
+                </div>
+
+                <div class="flex flex-col gap-2">
+                    <div class="flex justify-between items-center text-xs font-medium text-gray-700 dark:text-gray-300">
+                        <label for="padding">Padding</label>
+                        <span id="padding_val" class="text-emerald-600 dark:text-emerald-400 font-mono">{{ padding }}px</span>
+                    </div>
+                    <input type="range" id="padding" min="30" max="120" value="{{ padding }}" class="w-full accent-emerald-500">
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Footer -->
-    <footer class="mt-12 text-center text-sm text-gray-400 dark:text-gray-500">
-        <p>Made by <span class="font-semibold text-gray-700 dark:text-gray-300">Faheem</span> • Powered by Python & Flask</p>
-    </footer>
-</div>
+        <!-- Preview Panel -->
+        <div class="lg:col-span-7 flex flex-col min-h-[400px]">
+            <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 flex-1 flex flex-col shadow-sm dark:shadow-none transition-colors">
+                <div class="flex items-center justify-between pb-3 border-b border-gray-200 dark:border-gray-800 mb-4">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Live Preview</span>
+                    </div>
+                    <span id="statusText" class="text-xs text-gray-500 dark:text-gray-400 hidden">Generating...</span>
+                </div>
 
-<script>
-const codeInput = document.getElementById("code");
-const themeSelect = document.getElementById("theme");
-const gradientSelect = document.getElementById("gradient");
-const fontSizeInput = document.getElementById("font_size");
-const fontSizeVal = document.getElementById("font_size_val");
-const preview = document.getElementById("preview");
-const generateBtn = document.getElementById("generateBtn");
-const loader = document.getElementById("loader");
+                <div class="flex-1 flex items-center justify-center min-h-[380px] p-4 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#1f2937_1px,transparent_1px)] [background-size:16px_16px] rounded-xl border border-gray-200 dark:border-gray-800/60 overflow-auto">
+                    <img id="previewImg" src="" alt="Generated Code Image" class="max-w-full h-auto rounded-lg transition-all duration-300 opacity-100">
+                </div>
+            </div>
+        </div>
 
-// Slider dynamic update
-fontSizeInput.addEventListener("input", () => {
-    fontSizeVal.textContent = fontSizeInput.value;
-});
+    </main>
 
-// Dark Mode Toggle Logic
-const darkModeToggle = document.getElementById("darkModeToggle");
-const themeIcon = document.getElementById("themeIcon");
-const themeText = document.getElementById("themeText");
+    <script>
+        const html = document.documentElement;
+        const themeToggleBtn = document.getElementById('themeToggleBtn');
+        const savedTheme = localStorage.getItem('theme');
+        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
-darkModeToggle.addEventListener("click", () => {
-    document.documentElement.classList.toggle("dark");
-    const isDark = document.documentElement.classList.contains("dark");
-    themeIcon.textContent = isDark ? "☀️" : "🌙";
-    themeText.textContent = isDark ? "Light Mode" : "Dark Mode";
-});
+        if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
+            html.classList.add('dark');
+        } else {
+            html.classList.remove('dark');
+        }
 
-// Generate Image Handler
-async function generateImage() {
-    loader.style.display = "flex";
+        themeToggleBtn.addEventListener('click', () => {
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        });
 
-    const response = await fetch("/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            code: codeInput.value,
-            theme: themeSelect.value,
-            gradient: gradientSelect.value,
-            font_size: fontSizeInput.value
-        })
-    });
+        const inputs = ['code', 'language', 'gradient', 'theme', 'window_style', 'aspect_ratio', 'window_title', 'highlight_lines', 'font_size', 'padding', 'watermark'];
+        const codeArea = document.getElementById('code');
+        const previewImg = document.getElementById('previewImg');
+        const statusText = document.getElementById('statusText');
+        const fontSizeVal = document.getElementById('font_size_val');
+        const paddingVal = document.getElementById('padding_val');
+        let currentShareUrl = window.location.href;
+        let currentFilename = 'devaid-code.png';
+        let debounceTimer;
 
-    const data = await response.json();
+        document.getElementById('font_size').addEventListener('input', (e) => { fontSizeVal.textContent = `${e.target.value}px`; });
+        document.getElementById('padding').addEventListener('input', (e) => { paddingVal.textContent = `${e.target.value}px`; });
 
-    if(data.success){
-        preview.classList.remove("show");
-        preview.src = data.image_url + "?t=" + new Date().getTime(); // Prevent browser cache
-        
-        document.getElementById("downloadBtn").href = `/download/${data.filename}`;
-        
-        setTimeout(() => preview.classList.add("show"), 50);
-    }
+        codeArea.addEventListener('keydown', (e) => {
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                const start = codeArea.selectionStart;
+                const end = codeArea.selectionEnd;
+                codeArea.value = codeArea.value.substring(0, start) + '    ' + codeArea.value.substring(end);
+                codeArea.selectionStart = codeArea.selectionEnd = start + 4;
+                updatePreview();
+            } else if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault();
+                updatePreview();
+            }
+        });
 
-    loader.style.display = "none";
-}
+        function updatePreview() {
+            statusText.classList.remove('hidden');
+            previewImg.classList.add('opacity-50');
 
-// Copy Image to Clipboard Handler
-async function copyImageToClipboard() {
-    const copyBtn = document.getElementById('copyBtn');
-    
-    try {
-        const response = await fetch(preview.src);
-        const blob = await response.blob();
-        
-        await navigator.clipboard.write([
-            new ClipboardItem({ [blob.type]: blob })
-        ]);
-        
-        const originalText = copyBtn.innerHTML;
-        copyBtn.innerHTML = "✓ Copied!";
-        copyBtn.classList.add("bg-emerald-600");
-        
-        setTimeout(() => {
-            copyBtn.innerHTML = originalText;
-            copyBtn.classList.remove("bg-emerald-600");
-        }, 2000);
-    } catch (err) {
-        alert("Copying image failed. Try downloading instead.");
-    }
-}
+            const payload = {
+                code: document.getElementById('code').value,
+                language: document.getElementById('language').value,
+                gradient: document.getElementById('gradient').value,
+                theme: document.getElementById('theme').value,
+                window_style: document.getElementById('window_style').value,
+                aspect_ratio: document.getElementById('aspect_ratio').value,
+                window_title: document.getElementById('window_title').value,
+                highlight_lines: document.getElementById('highlight_lines').value,
+                font_size: document.getElementById('font_size').value,
+                padding: document.getElementById('padding').value,
+                watermark: document.getElementById('watermark').value,
+                show_line_numbers: document.getElementById('show_line_numbers').checked
+            };
 
-generateBtn.addEventListener("click", generateImage);
-</script>
+            fetch('/generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    previewImg.src = `${data.image_url}?t=${new Date().getTime()}`;
+                    currentShareUrl = data.share_url;
+                    currentFilename = data.filename;
+                }
+            })
+            .catch(err => console.error('Error generating image:', err))
+            .finally(() => {
+                statusText.classList.add('hidden');
+                previewImg.classList.remove('opacity-50');
+            });
+        }
+
+        document.getElementById('presetTwitter').addEventListener('click', () => {
+            document.getElementById('aspect_ratio').value = '16:9';
+            document.getElementById('padding').value = '60';
+            paddingVal.textContent = '60px';
+            updatePreview();
+        });
+
+        document.getElementById('presetInsta').addEventListener('click', () => {
+            document.getElementById('aspect_ratio').value = '1:1';
+            document.getElementById('padding').value = '80';
+            paddingVal.textContent = '80px';
+            updatePreview();
+        });
+
+        inputs.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                const eventType = el.tagName === 'SELECT' ? 'change' : 'input';
+                el.addEventListener(eventType, () => {
+                    clearTimeout(debounceTimer);
+                    debounceTimer = setTimeout(updatePreview, 300);
+                });
+            }
+        });
+
+        document.getElementById('show_line_numbers').addEventListener('change', () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(updatePreview, 300);
+        });
+
+        document.getElementById('generateBtn').addEventListener('click', updatePreview);
+
+        document.getElementById('copyCodeBtn').addEventListener('click', () => {
+            navigator.clipboard.writeText(codeArea.value).then(() => {
+                const label = document.getElementById('copyCodeText');
+                label.textContent = 'Copied!';
+                setTimeout(() => label.textContent = 'Copy Code', 2000);
+            });
+        });
+
+        document.getElementById('copyImgBtn').addEventListener('click', async () => {
+            const label = document.getElementById('copyImgText');
+            try {
+                const response = await fetch(previewImg.src);
+                const blob = await response.blob();
+                await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
+                label.textContent = 'Copied!';
+                setTimeout(() => label.textContent = 'Copy Image', 2000);
+            } catch (err) {
+                label.textContent = 'Failed';
+                setTimeout(() => label.textContent = 'Copy Image', 2000);
+            }
+        });
+
+        document.getElementById('shareUrlBtn').addEventListener('click', () => {
+            navigator.clipboard.writeText(currentShareUrl).then(() => {
+                const label = document.getElementById('shareUrlText');
+                label.textContent = 'Link Copied!';
+                setTimeout(() => label.textContent = 'Share Link', 2000);
+            });
+        });
+
+        document.getElementById('downloadBtn').addEventListener('click', () => {
+            window.location.href = `/download/${currentFilename}`;
+        });
+
+        updatePreview();
+    </script>
 </body>
 </html>

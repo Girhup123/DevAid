@@ -1,103 +1,164 @@
 import os
 import uuid
-import io
-from flask import Flask, render_template, request, jsonify, send_from_directory, send_file
-from generate import code_to_image
+import urllib.parse
+from flask import Flask, render_template, request, jsonify, send_file
+from generate import code_to_image, SUPPORTED_LANGUAGES
 
-app = Flask(__name__, static_folder="static", static_url_path="/static")
-os.makedirs("static", exist_ok=True)
+app = Flask(__name__)
 
-# -------------------- SAMPLE CODE --------------------
-SAMPLE_CODE = """# Python sample: greeting multiple users
-def greet(name):
-    print(f"Hello, {name}!")
+OUTPUT_DIR = os.path.join("static", "exports")
+os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-users = ["Alice", "Bob", "Charlie"]
+DEFAULT_CODE = """# QuickSort Algorithm
+def quicksort(arr):
+    if len(arr) <= 1:
+        return arr
+    pivot = arr[len(arr) // 2]
+    left = [x for x in arr if x < pivot]
+    middle = [x for x in arr if x == pivot]
+    right = [x for x in arr if x > pivot]
+    return quicksort(left) + middle + quicksort(right)
 
-for user in users:
-    greet(user)
-"""
+numbers = [3, 6, 8, 10, 1, 2, 1]
+print("Sorted array:", quicksort(numbers))"""
 
-# -------------------- HOME --------------------
-@app.route("/")
-def home():
-    return render_template("index.html", code=SAMPLE_CODE, theme="monokai", font_size=20)
+def parse_bool(val) -> bool:
+    if isinstance(val, bool):
+        return val
+    if isinstance(val, str):
+        return val.lower() in ('true', '1', 't', 'yes', 'on')
+    return True
 
-# -------------------- GENERATE IMAGE (WEB UI) --------------------
-@app.route("/generate", methods=["POST"])
+@app.route('/')
+def index():
+    code = request.args.get('code', DEFAULT_CODE)
+    language = request.args.get('language', 'python')
+    theme = request.args.get('theme', 'dracula')
+    gradient = request.args.get('gradient', 'purple_blue')
+    font_size = request.args.get('font_size', '20')
+    window_title = request.args.get('window_title', 'main.py')
+    window_style = request.args.get('window_style', 'mac')
+    aspect_ratio = request.args.get('aspect_ratio', 'auto')
+    highlight_lines = request.args.get('highlight_lines', '')
+    show_line_numbers = parse_bool(request.args.get('show_line_numbers', 'true'))
+    padding = request.args.get('padding', '60')
+    watermark = request.args.get('watermark', '')
+
+    languages_list = sorted(SUPPORTED_LANGUAGES.keys())
+
+    return render_template(
+        'index.html',
+        code=code,
+        language=language,
+        theme=theme,
+        gradient=gradient,
+        font_size=font_size,
+        window_title=window_title,
+        window_style=window_style,
+        aspect_ratio=aspect_ratio,
+        highlight_lines=highlight_lines,
+        show_line_numbers=show_line_numbers,
+        padding=padding,
+        watermark=watermark,
+        languages=languages_list
+    )
+
+@app.route('/generate', methods=['POST'])
 def generate():
     data = request.json or {}
-    code = data.get("code", SAMPLE_CODE)
-    theme = data.get("theme", "monokai")
-    font_size = int(data.get("font_size", 20))
+
+    code = data.get("code", DEFAULT_CODE)
+    language = data.get("language", "python")
+    theme = data.get("theme", "dracula")
     gradient = data.get("gradient", "purple_blue")
 
-    # Generate a unique filename using UUID
-    unique_filename = f"output_{uuid.uuid4().hex[:8]}.png"
-    filepath = os.path.join("static", unique_filename)
-
-    # Pass parameters to the updated generator
-    code_to_image(code, filepath, font_size=font_size, style=theme, gradient_theme=gradient)
-
-    return jsonify({"success": True, "image_url": f"/static/{unique_filename}", "filename": unique_filename})
-
-# -------------------- REST API ENDPOINT --------------------
-@app.route("/api/generate", methods=["POST"])
-def api_generate():
-    """
-    Public REST API endpoint for developers.
-    Payload (JSON):
-    {
-      "code": "print('hello world')",
-      "theme": "monokai",
-      "font_size": 20,
-      "gradient": "purple_blue"
-    }
-    """
     try:
-        data = request.get_json(force=True) or {}
-        code = data.get("code", SAMPLE_CODE)
-        theme = data.get("theme", "monokai")
         font_size = int(data.get("font_size", 20))
-        gradient = data.get("gradient", "purple_blue")
+    except (ValueError, TypeError):
+        font_size = 20
 
-        # Create temporary file to hold the rendered image
-        temp_filename = f"api_{uuid.uuid4().hex[:8]}.png"
-        temp_path = os.path.join("static", temp_filename)
+    try:
+        padding = int(data.get("padding", 60))
+    except (ValueError, TypeError):
+        padding = 60
 
-        code_to_image(code, temp_path, font_size=font_size, style=theme, gradient_theme=gradient)
+    window_title = data.get("window_title", "main.py")
+    window_style = data.get("window_style", "mac")
+    aspect_ratio = data.get("aspect_ratio", "auto")
+    highlight_lines = data.get("highlight_lines", "")
+    show_line_numbers = parse_bool(data.get("show_line_numbers", True))
+    watermark = data.get("watermark", "")
 
-        # Read into memory buffer so we can delete temp file or stream directly
-        with open(temp_path, "rb") as f:
-            image_buffer = io.BytesIO(f.read())
-        
-        # Cleanup temporary API file from disk
-        if os.path.exists(temp_path):
-            os.remove(temp_path)
+    unique_id = uuid.uuid4().hex[:8]
+    filename = f"snippet_{unique_id}.png"
+    output_path = os.path.join(OUTPUT_DIR, filename)
 
-        image_buffer.seek(0)
-        return send_file(
-            image_buffer,
-            mimetype="image/png",
-            as_attachment=False,
-            download_name="code.png"
+    code_to_image(
+        code_text=code,
+        output_file=output_path,
+        language=language,
+        font_size=font_size,
+        style=theme,
+        gradient_theme=gradient,
+        window_title=window_title,
+        window_style=window_style,
+        aspect_ratio=aspect_ratio,
+        highlight_lines=highlight_lines,
+        show_line_numbers=show_line_numbers,
+        padding=padding,
+        watermark=watermark
+    )
+
+    params = {
+        'code': code,
+        'language': language,
+        'theme': theme,
+        'gradient': gradient,
+        'font_size': font_size,
+        'window_title': window_title,
+        'window_style': window_style,
+        'aspect_ratio': aspect_ratio,
+        'highlight_lines': highlight_lines,
+        'show_line_numbers': str(show_line_numbers).lower(),
+        'padding': padding,
+        'watermark': watermark
+    }
+    share_url = f"{request.host_url}?{urllib.parse.urlencode(params)}"
+
+    return jsonify({
+        "success": True,
+        "image_url": f"/static/exports/{filename}",
+        "filename": filename,
+        "share_url": share_url
+    })
+
+@app.route('/download/<filename>')
+def download(filename):
+    file_path = os.path.join(OUTPUT_DIR, filename)
+
+    if not os.path.exists(file_path):
+        code_to_image(
+            code_text=DEFAULT_CODE,
+            output_file=file_path,
+            language="python",
+            font_size=20,
+            style="dracula",
+            gradient_theme="purple_blue",
+            window_title="main.py",
+            window_style="mac",
+            aspect_ratio="auto",
+            highlight_lines="",
+            show_line_numbers=True,
+            padding=60,
+            watermark=""
         )
 
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 400
+    return send_file(
+        file_path,
+        as_attachment=True,
+        download_name="devaid-code.png",
+        mimetype="image/png"
+    )
 
-# -------------------- DOWNLOAD IMAGE --------------------
-@app.route("/download/<filename>")
-def download(filename):
-    # Securely serve the specific file as an attachment
-    return send_from_directory("static", filename, as_attachment=True)
-
-# -------------------- HEALTH CHECK --------------------
-@app.route("/health")
-def health():
-    return jsonify({"status": "ok"})
-
-# -------------------- RUN APP --------------------
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 10000))
-    app.run(host="0.0.0.0", port=port)
+if __name__ == '__main__':
+    app.run(debug=True, port=5000)
