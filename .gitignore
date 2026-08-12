@@ -1,5 +1,7 @@
 __pycache__/
 *.pyc
 venv/
-output.png
-static/output.png
+
+# Ignore all generated temporary image exports
+static/exports/*.png
+exports/*.png
